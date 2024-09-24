@@ -6,7 +6,7 @@ macro_rules! exit {
         const COLOR_RED: &str = "\x1b[31m";
         const COLOR_RESET : &str = "\x1b[0m";
 
-        eprintln!("{}ERROR:{} {}", COLOR_RED, COLOR_RESET, format!($($msg)*));
+        eprintln!("\n{}ERROR:{} {}", COLOR_RED, COLOR_RESET, format!($($msg)*));
         std::process::exit(1);
     }};
 }
@@ -75,7 +75,7 @@ fn main() {
             while i<file.len() {
                 match file.chars().nth(i).unwrap_or_else(|| exit!("Tried to get character at invalid index.")) {
                     '>' => {
-                        if index==CELL_SIZE {
+                        if index == (CELL_SIZE-1) {
                             exit!("Memory out of bounds (overflow), exceeded the memory size of {CELL_SIZE} cells.");
                         }
                         index += 1
