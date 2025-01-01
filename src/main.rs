@@ -11,13 +11,6 @@ macro_rules! exit {
     }};
 }
 
-macro_rules! printf {
-    ($($arg:tt)*) => {{
-        print!($($arg)*);
-        io::stdout().flush().unwrap_or_else(|_| exit!("Couldn't flush to output stream."));
-    }};
-}
-
 /// parse_parentheses(file, start, end, index)
 macro_rules! parse_parentheses {
     ($file: ident, $start: literal, $end: literal ,$index: ident) => {{
@@ -45,18 +38,15 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     match args.len() {
         1 => exit!("No file/argument was given."),
-        3 => exit!("Only one argument was expected, multiple were given."),
-        _ => ()
+        2 => (),
+        _ => exit!("Only one argument was expected, multiple were given.")
     }
 
     match args[1].as_str() {
-        "--version" | "-v" => {
-            println!("Brainfuck interpreter, bfi v{}", env!("CARGO_PKG_VERSION"));
-            println!("Copyright (C) 2024 {}.", env!("CARGO_PKG_AUTHORS"));
-        },
+        "--version" | "-v" => { println!("Brainfuck interpreter, bfi v{}", env!("CARGO_PKG_VERSION")); },
 
         "--help" | "-h" => {
-            println!("Usage: bfi <file>");
+            println!("Usage: bfi <file>\n");
             println!("Options:");
             println!("--help    | -h   Display this information.");
             println!("--version | -v   Display interpreter version information.")
@@ -88,22 +78,22 @@ fn main() {
                     },
                     '+' => mem[index] += 1,
                     '-' => mem[index] -= 1,
-                    '.' => printf!("{}", mem[index] as char),
+                    '.' => {
+                        print!("{}", mem[index] as char);
+                        io::stdout().flush().unwrap_or_else(|_| exit!("Couldn't flush to output stream."));
+                    }
                     ',' => {
                         let mut inp = String::new();
                         io::stdin().read_line(&mut inp).unwrap_or_else(|_| exit!("Failed to read line."));
 
-                        let mut ascii = inp.chars().nth(0).unwrap_or_else(|| exit!("No input was given.")) as u8;
+                        let mut ascii = inp.chars().next().unwrap_or_else(|| exit!("No input was given.")) as u8;
                         if ascii == 13 {
                             ascii = 10;
                         }
                         mem[index] = ascii;
                     }
                     '[' => {
-                        match mem[index] {
-                            0 => parse_parentheses!(file, '[', ']', i),
-                            _ => ()
-                        }
+                        if mem[index] == 0 { parse_parentheses!(file, '[', ']', i) }
                     }
                     ']' => {
                         match mem[index] {
