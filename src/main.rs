@@ -13,7 +13,7 @@ macro_rules! exit {
 
 /// parse_parentheses(file, start, end, index)
 macro_rules! parse_parentheses {
-    ($file: ident, $start: literal, $end: literal ,$index: ident) => {{
+    ($file: ident, $start: literal, $end: literal, $index: ident) => {{
         let mut level = 0;
         
         loop {
@@ -55,7 +55,7 @@ fn main() {
         file_name if file_name.ends_with(".bf") || file_name.ends_with(".b") => {
             let file = match fs::read_to_string(file_name) {
                 Ok(file) => file,
-                Err(_)          => exit!("Cannot find the given file.")
+                Err(_)           => exit!("Cannot find the given file.")
             };
 
             const CELL_SIZE: usize = 30000;
@@ -96,10 +96,7 @@ fn main() {
                         if mem[index] == 0 { parse_parentheses!(file, '[', ']', i) }
                     }
                     ']' => {
-                        match mem[index] {
-                            0 => (),
-                            _ => parse_parentheses!(file, ']', '[', i)
-                        }
+                        if mem[index] != 0 { parse_parentheses!(file, ']', '[', i) }
                     }
                     _ => ()
                 }
